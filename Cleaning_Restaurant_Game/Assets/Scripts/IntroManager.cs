@@ -6,38 +6,39 @@ using UnityEngine.SceneManagement;
 public class IntroManager : MonoBehaviour
 {
     public Sprite[] slideImages;
+    public Sprite storefrontImage;
+
     public Image introImage;
-
-    // 슬라이드 디졸브용
-    public CanvasGroup introCanvasGroup;
-    public float slideFadeDuration = 0.3f;
-
-    // 게임 씬 전환용 검은 화면
     public CanvasGroup transitionCanvasGroup;
-    public float sceneFadeDuration = 1.5f;
+    public float slideFadeDuration = 0.4f;
+    public float sceneFadeDuration = 0.8f;
+
+    public Button screenClickButton;
+    public GameObject doorGlow;
+    public Button doorButton;
 
     private int currentSlide = 0;
-    private bool isTransitioning = false; // 페이드 도중 중복 클릭 방지
+    private bool isTransitioning = false;
+    private bool atStorefront = false;
 
     void Start()
     {
         introImage.sprite = slideImages[currentSlide];
-        introCanvasGroup.alpha = 1f;
 
-        // 추가: 씬 시작할 때 까만 화면에서 서서히 밝아지기
-        transitionCanvasGroup.alpha = 0.8f;
+        // 씬 시작할 때 까만 화면에서 서서히 밝아지기
+        transitionCanvasGroup.alpha = 1f;
         StartCoroutine(FadeCanvasGroup(transitionCanvasGroup, 1f, 0f, sceneFadeDuration));
     }
 
     public void OnClickNext()
     {
-        if (isTransitioning) return; // 페이드 중이면 클릭 무시
+        if (isTransitioning || atStorefront) return;
 
         currentSlide++;
 
         if (currentSlide >= slideImages.Length)
         {
-            StartCoroutine(FadeToGameScene());
+            StartCoroutine(ShowStorefront());
         }
         else
         {
@@ -45,34 +46,51 @@ public class IntroManager : MonoBehaviour
         }
     }
 
-    // 슬라이드 전환: 사라짐 → 그림 교체 → 나타남
+    public void OnClickDoor()
+    {
+        if (isTransitioning) return;
+        StartCoroutine(FadeToGameScene());
+    }
+
     IEnumerator ChangeSlide(int index)
     {
         isTransitioning = true;
 
-        // 검은 화면으로 덮기
         yield return StartCoroutine(FadeCanvasGroup(transitionCanvasGroup, 0f, 1f, slideFadeDuration));
-
-        // 화면이 까맣게 가려진 상태에서 그림 교체
         introImage.sprite = slideImages[index];
-
-        // 검은 화면 걷어내기
         yield return StartCoroutine(FadeCanvasGroup(transitionCanvasGroup, 1f, 0f, slideFadeDuration));
 
         isTransitioning = false;
     }
 
-    // 게임 씬 전환: 화면이 서서히 까매진 뒤 씬 전환
+    IEnumerator ShowStorefront()
+    {
+        isTransitioning = true;
+
+        yield return StartCoroutine(FadeCanvasGroup(transitionCanvasGroup, 0f, 1f, slideFadeDuration));
+        introImage.sprite = storefrontImage;
+        yield return StartCoroutine(FadeCanvasGroup(transitionCanvasGroup, 1f, 0f, slideFadeDuration));
+
+        atStorefront = true;
+        screenClickButton.interactable = false;
+        doorGlow.SetActive(true);
+        doorButton.interactable = true;
+
+        isTransitioning = false;
+    }
+
     IEnumerator FadeToGameScene()
     {
         isTransitioning = true;
+
+        doorButton.interactable = false;
+        doorGlow.SetActive(false); // 추가: 문 클릭하는 순간 빛 효과를 바로 꺼버림
 
         yield return StartCoroutine(FadeCanvasGroup(transitionCanvasGroup, 0f, 1f, sceneFadeDuration));
 
         SceneManager.LoadScene("Game");
     }
 
-    // 여러 곳에서 재사용하는 공용 페이드 함수
     IEnumerator FadeCanvasGroup(CanvasGroup cg, float from, float to, float duration)
     {
         float elapsed = 0f;

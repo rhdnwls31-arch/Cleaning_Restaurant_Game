@@ -5,14 +5,21 @@ public class DraggableTrash : MonoBehaviour
     public Transform trashBin;
     public float distanceToDelete = 1.0f;
 
-    // 추가: 쓰레기 치웠을 때 GameManager한테 알려주기 위해 연결
-    public GameManager gameManager;
+    // 추가: 이 쓰레기가 메인 홀 것인지 스태프방 것인지
+    public RoomRegion region = RoomRegion.MainHall;
+
+    public GameObject hiddenKey;
 
     private bool isDragging = false;
 
     void OnMouseDown()
     {
         isDragging = true;
+
+        if (hiddenKey != null)
+        {
+            hiddenKey.SetActive(true);
+        }
     }
 
     void OnMouseUp()
@@ -23,12 +30,7 @@ public class DraggableTrash : MonoBehaviour
 
         if (distance < distanceToDelete)
         {
-            // 추가: 사라지기 전에 GameManager한테 "쓰레기 하나 치웠어요" 알려주기
-            if (gameManager != null)
-            {
-                gameManager.AddTrashCleaned();
-            }
-
+            GameManager.Instance.AddTrashCleaned(region);
             Destroy(gameObject);
         }
     }
