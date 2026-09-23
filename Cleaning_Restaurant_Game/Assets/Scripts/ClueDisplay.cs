@@ -9,9 +9,6 @@ public class ClueDisplay : MonoBehaviour
     public GameObject backgroundOverlay;
     public float fadeDuration = 0.5f;
 
-    // 추가: 닫힐 때 엔딩 조건을 확인하기 위해 연결
-    public GameManager gameManager;
-
     private bool justOpened = false;
 
     public void ShowClue(Sprite sprite)
@@ -67,10 +64,7 @@ public class ClueDisplay : MonoBehaviour
         clueImageUI.gameObject.SetActive(false);
         backgroundOverlay.SetActive(false);
 
-        // 추가: 단서 이미지가 완전히 닫힌 후에 엔딩 조건 확인
-        if (gameManager != null)
-        {
-            gameManager.CheckEnding();
-        }
+        // 단서 이미지가 완전히 닫힌 후에 엔딩 조건 확인
+        GameManager.Instance.CheckEnding();
     }
 }

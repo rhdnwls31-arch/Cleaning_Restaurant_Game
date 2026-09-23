@@ -1,0 +1,10 @@
+{
+    "name": "Bjdue123.ComUnityAiAssistant.Editor",
+    "references": [
+      "Bjdue123.ComUnityAiAssistant"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}

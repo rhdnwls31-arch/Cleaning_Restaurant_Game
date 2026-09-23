@@ -1,0 +1,14 @@
+{
+    "name": "Bjdue123.ComUnityAiAssistant.Editor.Tests",
+    "references": [
+        "Bjdue123.ComUnityAiAssistant.Editor",
+        "Bjdue123.ComUnityAiAssistant"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}

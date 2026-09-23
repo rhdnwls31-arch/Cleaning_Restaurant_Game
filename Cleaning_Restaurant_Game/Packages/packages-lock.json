@@ -1,5 +1,13 @@
 {
   "dependencies": {
+    "com.bjdue123.com.unity.ai.assistant": {
+      "version": "file:com.bjdue123.com.unity.ai.assistant",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.test-framework": "1.6.0"
+      }
+    },
     "com.unity.2d.animation": {
       "version": "16.0.0",
       "depth": 0,

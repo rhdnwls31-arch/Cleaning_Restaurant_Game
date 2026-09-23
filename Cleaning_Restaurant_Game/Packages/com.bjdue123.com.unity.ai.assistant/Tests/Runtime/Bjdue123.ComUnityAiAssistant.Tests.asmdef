@@ -1,0 +1,11 @@
+{
+    "name": "Bjdue123.ComUnityAiAssistant.Tests",
+    "references": [
+        "Bjdue123.ComUnityAiAssistant"
+    ],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": []
+}
