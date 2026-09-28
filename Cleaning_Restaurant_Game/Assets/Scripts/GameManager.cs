@@ -2,33 +2,36 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Collections.Generic;
 
-// 오브젝트가 어느 방 소속인지 구분하는 이름표
 public enum RoomRegion { MainHall, StaffRoom }
 
 public class GameManager : MonoBehaviour
 {
-    // 어디서든 GameManager.Instance로 이 오브젝트에 접근할 수 있게 함
     public static GameManager Instance;
 
-    // ===== 메인 홀 진행 상황 =====
     private int mainHallClueCount = 0;
     public int mainHallTotalClues = 3;
     private int mainHallTrashCount = 0;
-    public int mainHallTotalTrash = 4;
+    public int mainHallTotalTrash = 8;
 
-    // ===== 스태프방 진행 상황 =====
     private int staffClueCount = 0;
-    public int staffTotalClues = 1;
+    public int staffTotalClues = 2;
     private int staffTrashCount = 0;
-    public int staffTotalTrash = 2;
+    public int staffTotalTrash = 4;
 
-    // ===== 공통 =====
     public bool hasKey = false;
     private bool endingShown = false;
     public float fadeDuration = 1.0f;
+    public bool enableEndingCheck = false;
 
-    // 지금 활성화된 씬의 UI를 담아두는 칸 (씬 바뀔 때마다 다시 채워짐)
+    // 추가: 이미 처리된 오브젝트의 고유 ID를 기억하는 목록
+    private HashSet<string> collectedIds = new HashSet<string>();
+
+    public void OnClickBackToMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
     private Image mainHallClueDisplay;
     private Sprite[] mainHallClueSprites;
     private Image mainHallCleanBarFill;
@@ -41,18 +44,27 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        // 이미 다른 GameManager가 존재하면(씬 재진입 등), 이 새 오브젝트는 없앰
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
         }
-
         Instance = this;
-        DontDestroyOnLoad(gameObject); // 씬이 바뀌어도 이 오브젝트는 파괴 안 됨
+        DontDestroyOnLoad(gameObject);
     }
 
-    // ===== 메인 홀 씬이 자기 UI를 등록할 때 호출 =====
+    // 추가: 이 ID가 이미 처리됐는지 확인
+    public bool IsCollected(string id)
+    {
+        return collectedIds.Contains(id);
+    }
+
+    // 추가: 이 ID를 "처리 완료"로 기록
+    public void MarkCollected(string id)
+    {
+        collectedIds.Add(id);
+    }
+
     public void RegisterMainHallUI(Image clueDisplay, Sprite[] clueSprites, Image cleanBar, Image endingImg, CanvasGroup endingCg)
     {
         mainHallClueDisplay = clueDisplay;
@@ -63,9 +75,11 @@ public class GameManager : MonoBehaviour
 
         UpdateMainHallClueDisplay();
         UpdateMainHallCleanBar();
+
+        // 추가: 메인 홀에 들어올 때마다 엔딩 조건 자동 확인 (문 클릭 안 해도 됨)
+        CheckEnding();
     }
 
-    // ===== 스태프방 씬이 자기 UI를 등록할 때 호출 =====
     public void RegisterStaffRoomUI(Image clueDisplay, Sprite[] clueSprites, Image cleanBar)
     {
         staffClueDisplay = clueDisplay;
@@ -116,9 +130,9 @@ public class GameManager : MonoBehaviour
         return staffClueCount >= staffTotalClues && staffTrashCount >= staffTotalTrash;
     }
 
-    // 메인 홀에 있을 때만 최종 엔딩 조건을 확인함
     public void CheckEnding()
     {
+        if (!enableEndingCheck) return;
         if (endingShown) return;
         if (SceneManager.GetActiveScene().name != "Game") return;
 
@@ -133,7 +147,7 @@ public class GameManager : MonoBehaviour
 
     void UpdateMainHallClueDisplay()
     {
-        if (mainHallClueDisplay != null && mainHallClueSprites != null)
+        if (mainHallClueDisplay != null && mainHallClueSprites != null && mainHallClueCount < mainHallClueSprites.Length)
         {
             mainHallClueDisplay.sprite = mainHallClueSprites[mainHallClueCount];
         }
@@ -149,7 +163,7 @@ public class GameManager : MonoBehaviour
 
     void UpdateStaffClueDisplay()
     {
-        if (staffClueDisplay != null && staffClueSprites != null)
+        if (staffClueDisplay != null && staffClueSprites != null && staffClueCount < staffClueSprites.Length)
         {
             staffClueDisplay.sprite = staffClueSprites[staffClueCount];
         }

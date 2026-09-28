@@ -5,11 +5,21 @@ public class ClueObject : MonoBehaviour
 {
     public Sprite clueSprite;
     public ClueDisplay clueDisplay;
-
-    // 추가: 이 단서가 메인 홀 것인지 스태프방 것인지 Inspector에서 선택
     public RoomRegion region = RoomRegion.MainHall;
 
+    // 추가: 이 단서만의 고유 이름표
+    public string uniqueId;
+
     private bool alreadyFound = false;
+
+    void Start()
+    {
+        // 추가: 이미 확인했던 단서라면, 씬이 다시 로드돼도 카운트가 또 올라가지 않게
+        if (!string.IsNullOrEmpty(uniqueId) && GameManager.Instance.IsCollected(uniqueId))
+        {
+            alreadyFound = true;
+        }
+    }
 
     void OnMouseDown()
     {
@@ -23,7 +33,12 @@ public class ClueObject : MonoBehaviour
         if (!alreadyFound)
         {
             alreadyFound = true;
-            GameManager.Instance.AddClue(region); // 이제 Inspector 연결 없이 바로 접근
+            GameManager.Instance.AddClue(region);
+
+            if (!string.IsNullOrEmpty(uniqueId))
+            {
+                GameManager.Instance.MarkCollected(uniqueId);
+            }
         }
     }
 }
